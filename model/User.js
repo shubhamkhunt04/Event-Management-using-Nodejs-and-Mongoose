@@ -6,16 +6,18 @@ var UserSchema = new Schema(
     username: {
       type: String,
       require: true,
+      trim: true,
     },
     email: {
       type: String,
       require: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
       minlength: 8,
-      maxlength: 20,
+      trim: true,
     },
 
     // posts: [
