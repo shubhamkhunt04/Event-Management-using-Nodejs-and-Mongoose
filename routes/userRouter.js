@@ -6,6 +6,7 @@ const {
   validateRegisterInput,
   validateLoginInput,
   validateUpdatePasswordInput,
+  validateResetPasswordInput,
 } = require("../util/validator");
 const { validateToken } = require("../util/validateToken");
 
@@ -114,6 +115,35 @@ userRouter.put("/updatepassword", validateToken, async (req, res) => {
     // throw new Error(error.details.map((e) => e.message));
     return res.json({ message: error.details.map((e) => e.message) });
   }
+});
+
+userRouter.post("/resetpassword", async (req, res) => {
+  const { email } = req.body;
+
+  const { isValid, error } = await validateResetPasswordInput(email);
+  console.log(email);
+  res.send("ok");
+
+  // if (isValid) {
+  //   try {
+  //     const user = await User.findById(id);
+  //     if (user) {
+  //       const match = await bcrypt.compare(oldPassword, user.password);
+  //       if (!match) {
+  //         return res.json({ message: "Please enter currect password !" });
+  //       }
+  //       await User.findByIdAndUpdate(id, {
+  //         password: await bcrypt.hash(newPassword, 12),
+  //       });
+  //       return res.json({ message: "Password updated successfully !" });
+  //     }
+  //   } catch (error) {
+  //     return res.json({ message: "Something went wrong !" });
+  //   }
+  // } else {
+  //   // throw new Error(error.details.map((e) => e.message));
+  //   return res.json({ message: error.details.map((e) => e.message) });
+  // }
 });
 
 module.exports = userRouter;

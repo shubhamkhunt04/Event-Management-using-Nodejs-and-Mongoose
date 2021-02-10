@@ -73,3 +73,24 @@ module.exports.validateUpdatePasswordInput = async (
     return { message: "Something wents wrong !" };
   }
 };
+
+module.exports.validateResetPasswordInput = async (email) => {
+  const loginSchema = Joi.object().keys({
+    email: Joi.string().email().required(),
+  });
+  try {
+    const { error } = await loginSchema.validate(
+      {
+        email,
+      },
+      { abortEarly: false }
+    );
+    if (error) {
+      return { isValid: false, error };
+    }
+    return { isValid: true };
+  } catch (err) {
+    console.log(err);
+    return { message: "Something wents wrong !" };
+  }
+};
