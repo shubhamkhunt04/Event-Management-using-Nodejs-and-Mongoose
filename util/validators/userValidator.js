@@ -52,12 +52,12 @@ module.exports.validateUpdatePasswordInput = async (
   oldPassword,
   newPassword
 ) => {
-  const loginSchema = Joi.object().keys({
+  const updatePasswordSchema = Joi.object().keys({
     oldPassword: Joi.string().min(8).required().strict(),
     newPassword: Joi.string().min(8).required().strict(),
   });
   try {
-    const { error } = await loginSchema.validate(
+    const { error } = await updatePasswordSchema.validate(
       {
         oldPassword,
         newPassword,
@@ -75,11 +75,11 @@ module.exports.validateUpdatePasswordInput = async (
 };
 
 module.exports.validateResetPasswordInput = async (email) => {
-  const loginSchema = Joi.object().keys({
+  const resetPasswordSchema = Joi.object().keys({
     email: Joi.string().email().required(),
   });
   try {
-    const { error } = await loginSchema.validate(
+    const { error } = await resetPasswordSchema.validate(
       {
         email,
       },
@@ -96,11 +96,11 @@ module.exports.validateResetPasswordInput = async (email) => {
 };
 
 module.exports.validateChangePasswordInput = async (password) => {
-  const loginSchema = Joi.object().keys({
+  const changePasswordSchema = Joi.object().keys({
     password: Joi.string().min(8).required().strict(),
   });
   try {
-    const { error } = await loginSchema.validate(
+    const { error } = await changePasswordSchema.validate(
       {
         password,
       },

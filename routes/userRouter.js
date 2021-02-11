@@ -10,7 +10,7 @@ const {
   validateUpdatePasswordInput,
   validateResetPasswordInput,
   validateChangePasswordInput,
-} = require("../util/validator");
+} = require("../util/validators/userValidator");
 const { validateToken } = require("../util/validateToken");
 
 const userRouter = express.Router();
@@ -49,8 +49,6 @@ userRouter.post("/register", async (req, res) => {
       return res.json({ message: "Something went wrong !" });
     }
   } else {
-    console.log(error.details.map((e) => e.message));
-    // throw new Error(error.details.map((e) => e.message));
     return res.json({ message: error.details.map((e) => e.message) });
   }
 });
@@ -76,13 +74,10 @@ userRouter.post("/login", async (req, res) => {
         payload: { ...user._doc, token },
         message: "User login successfully",
       });
-      // return res.json({ message: "User Already Exist" });
     } catch (error) {
       return res.json({ message: "Something went wrong !" });
     }
   } else {
-    console.log(error.details.map((e) => e.message));
-    // throw new Error(error.details.map((e) => e.message));
     return res.json({ message: error.details.map((e) => e.message) });
   }
 });
@@ -115,7 +110,6 @@ userRouter.put("/updatepassword", validateToken, async (req, res) => {
       return res.json({ message: "Something went wrong !" });
     }
   } else {
-    // throw new Error(error.details.map((e) => e.message));
     return res.json({ message: error.details.map((e) => e.message) });
   }
 });
@@ -146,6 +140,8 @@ userRouter.post("/resetpassword", async (req, res) => {
       console.log(error);
       return res.json({ message: "Something went wrong" });
     }
+  } else {
+    return res.json({ message: error.details.map((e) => e.message) });
   }
 });
 
@@ -177,6 +173,8 @@ userRouter.put("/changepassword/:token", async (req, res) => {
     } catch (error) {
       return res.json({ message: "Something went wrong" });
     }
+  } else {
+    return res.json({ message: error.details.map((e) => e.message) });
   }
 });
 

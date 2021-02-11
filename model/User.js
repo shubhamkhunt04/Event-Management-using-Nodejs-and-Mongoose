@@ -28,6 +28,19 @@ var UserSchema = new Schema(
       default: "",
     },
 
+    userEvents: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Event",
+      },
+    ],
+    invitedEvents: [
+      // {
+      //   type: Schema.Types.ObjectId,
+      //   ref: "Event",
+      // },
+    ],
+
     // posts: [
     //   {
     //     type: Schema.Types.ObjectId,

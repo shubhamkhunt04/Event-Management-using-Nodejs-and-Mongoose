@@ -3,10 +3,16 @@ var Schema = mongoose.Schema;
 
 var EventSchema = new Schema(
   {
-    name: {
+    eventName: {
       type: String,
       require: true,
     },
+    invitedUsers: [],
+    createdBy: {
+      type: String,
+      require: true,
+    },
+
     // email: {
     //   type: String,
     //   require: true,

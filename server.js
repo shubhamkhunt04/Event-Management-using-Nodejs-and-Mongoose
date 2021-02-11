@@ -24,7 +24,9 @@ mongoose
   .catch((err) => console.log(err));
 
 const userRouter = require("./routes/userRouter");
+const eventRouter = require("./routes/eventRouter");
 
 app.use("/user", userRouter);
+app.use("/event", eventRouter);
 
 app.listen(port, () => console.log("Server is running on port " + port));
