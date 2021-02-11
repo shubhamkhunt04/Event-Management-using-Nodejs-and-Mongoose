@@ -2,7 +2,7 @@ const express = require("express");
 const { eventNames } = require("../model/User");
 const User = require("../model/User");
 const Event = require("../model/Event");
-const { validateToken } = require("../util/validateToken");
+const { verifyUser } = require("../middleware/verifyUser");
 const {
   validateEventInput,
   validateInviteInput,
@@ -10,7 +10,7 @@ const {
 
 const eventRouter = express.Router();
 
-eventRouter.post("/createEvent", validateToken, async (req, res) => {
+eventRouter.post("/createEvent", verifyUser, async (req, res) => {
   let { eventName } = req.body;
   const { isValid, error } = await validateEventInput(eventName);
   if (isValid) {
@@ -21,7 +21,6 @@ eventRouter.post("/createEvent", validateToken, async (req, res) => {
       if (user) {
         user.userEvents.push(event.id);
         await user.save();
-        console.log(user);
       }
       return res.json({
         payload: event,
@@ -31,14 +30,14 @@ eventRouter.post("/createEvent", validateToken, async (req, res) => {
       return res.json({ message: "Something went wrong !" });
     }
   } else {
-    console.log(error.details.map((e) => e.message));
     return res.json({ message: error.details.map((e) => e.message) });
   }
 });
 
-eventRouter.get("/:userId/events", validateToken, async (req, res) => {
+eventRouter.get("/events", verifyUser, async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).populate("userEvents");
+    const { id } = req.decoded;
+    const user = await User.findById(id).populate("userEvents");
     if (user) {
       return res.json({
         payload: user.userEvents,
@@ -51,7 +50,7 @@ eventRouter.get("/:userId/events", validateToken, async (req, res) => {
   }
 });
 
-eventRouter.put("/:eventId", validateToken, async (req, res) => {
+eventRouter.put("/:eventId", verifyUser, async (req, res) => {
   const { email } = req.body;
   const { isValid, error } = await validateInviteInput(email);
   if (isValid) {
@@ -87,7 +86,6 @@ eventRouter.put("/:eventId", validateToken, async (req, res) => {
         message: "Invited Successfully",
       });
     } catch (error) {
-      console.log(error);
       res.json({ message: "Something went wrong" });
     }
   } else {
@@ -95,21 +93,17 @@ eventRouter.put("/:eventId", validateToken, async (req, res) => {
   }
 });
 
-eventRouter.get("/:userId/invitedEvents", validateToken, async (req, res) => {
+eventRouter.get("/invitedEvents", verifyUser, async (req, res) => {
   try {
-    id = req.decoded;
-    if (id.id !== req.params.userId) {
-      return res.json({ message: "You are not allow to see others events" });
-    }
-
-    const user = await User.findById(req.params.userId);
+    const { id } = req.decoded;
+    const user = await User.findById(id);
     res.json(user.invitedEvents);
   } catch (error) {
     return res.json({ message: "Something went wrong" });
   }
 });
 
-eventRouter.get("/:eventId", validateToken, async (req, res) => {
+eventRouter.get("/:eventId", verifyUser, async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId);
     if (!event) return res.json({ message: "Event not found" });
@@ -120,7 +114,7 @@ eventRouter.get("/:eventId", validateToken, async (req, res) => {
   }
 });
 
-eventRouter.put("/:eventId/updateEvent", validateToken, async (req, res) => {
+eventRouter.put("/:eventId/updateEvent", verifyUser, async (req, res) => {
   const { eventName } = req.body;
   const { isValid, error } = await validateEventInput(eventName);
   if (isValid) {

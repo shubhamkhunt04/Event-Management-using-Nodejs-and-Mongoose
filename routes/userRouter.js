@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const User = require("../model/User");
 const { mailSender } = require("../util/mailSender");
 const { generateToken } = require("../util/generateToken");
+const { paginatedResult } = require("../middleware/pagination");
 const {
   validateRegisterInput,
   validateLoginInput,
@@ -11,13 +12,15 @@ const {
   validateResetPasswordInput,
   validateChangePasswordInput,
 } = require("../util/validators/userValidator");
-const { validateToken } = require("../util/validateToken");
+const { verifyUser } = require("../middleware/verifyUser");
 
 const userRouter = express.Router();
 
-userRouter.get("/", validateToken, (req, res) => {
+userRouter.get("/users", paginatedResult(User), async (req, res) => {
   console.log(req.decoded);
-  res.json({ message: "private route" });
+  const user = await User.find();
+
+  res.json({ message: "All Users", payload: user });
 });
 
 userRouter.post("/register", async (req, res) => {
@@ -82,7 +85,7 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.put("/updatepassword", validateToken, async (req, res) => {
+userRouter.put("/updatepassword", verifyUser, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const { isValid, error } = await validateUpdatePasswordInput(
