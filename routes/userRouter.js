@@ -1,12 +1,15 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const User = require("../model/User");
+const { mailSender } = require("../util/mailSender");
 const { generateToken } = require("../util/generateToken");
 const {
   validateRegisterInput,
   validateLoginInput,
   validateUpdatePasswordInput,
   validateResetPasswordInput,
+  validateChangePasswordInput,
 } = require("../util/validator");
 const { validateToken } = require("../util/validateToken");
 
@@ -121,29 +124,60 @@ userRouter.post("/resetpassword", async (req, res) => {
   const { email } = req.body;
 
   const { isValid, error } = await validateResetPasswordInput(email);
-  console.log(email);
-  res.send("ok");
+  if (isValid) {
+    try {
+      const user = await User.findOne({ email });
+      if (user) {
+        const token = crypto.randomBytes(20).toString("hex");
+        console.log(token);
+        await user.updateOne({
+          resetPasswordToken: token,
+          resetPasswordExpires: Date.now() + 60000,
+        });
+        console.log(user);
+        await mailSender(email, token, user.username);
+        return res.json({
+          message: "Reset password link send to on your register mail",
+        });
+      } else {
+        return res.json({ message: "Email is not exist in database" });
+      }
+    } catch (error) {
+      console.log(error);
+      return res.json({ message: "Something went wrong" });
+    }
+  }
+});
 
-  // if (isValid) {
-  //   try {
-  //     const user = await User.findById(id);
-  //     if (user) {
-  //       const match = await bcrypt.compare(oldPassword, user.password);
-  //       if (!match) {
-  //         return res.json({ message: "Please enter currect password !" });
-  //       }
-  //       await User.findByIdAndUpdate(id, {
-  //         password: await bcrypt.hash(newPassword, 12),
-  //       });
-  //       return res.json({ message: "Password updated successfully !" });
-  //     }
-  //   } catch (error) {
-  //     return res.json({ message: "Something went wrong !" });
-  //   }
-  // } else {
-  //   // throw new Error(error.details.map((e) => e.message));
-  //   return res.json({ message: error.details.map((e) => e.message) });
-  // }
+userRouter.put("/changepassword/:token", async (req, res) => {
+  const { newPassword } = req.body;
+  console.log(newPassword);
+
+  const { isValid, error } = await validateChangePasswordInput(newPassword);
+  if (isValid) {
+    try {
+      const user = await User.findOne({
+        resetPasswordToken: req.params.token,
+        resetPasswordExpires: {
+          $gt: Date.now(),
+        },
+      });
+      if (user) {
+        await user.updateOne({
+          password: await bcrypt.hash(newPassword, 12),
+        });
+        return res.json({
+          message: "Password reset sucessfully",
+        });
+      } else {
+        return res.json({
+          message: "You are not authorize to reset the password",
+        });
+      }
+    } catch (error) {
+      return res.json({ message: "Something went wrong" });
+    }
+  }
 });
 
 module.exports = userRouter;

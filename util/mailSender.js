@@ -1,11 +1,11 @@
 const nodemailer = require("nodemailer");
 
-const mailSender = async (userEmail, randomPassword, username) => {
+const mailSender = async (userEmail, resetPasswordToken, username) => {
   const mailHTML = `
   <body style="background-color: black">
   <div style="margin-left: auto; margin-right: auto; width: 60rem">
     <h1 style="color: #ffe369; text-align: center; font-size: 50px">
-      Mood Enhancer
+      Event Management
     </h1>
     <div>
       <h1 style="text-align: center; color: white; margin-bottom: 2rem">
@@ -22,10 +22,10 @@ const mailSender = async (userEmail, randomPassword, username) => {
           padding: 30px;
         "
       >
-        <h1>${username},</h1>
+        <h1>${username}</h1>
         <h1>
-          <em>Your New Mood Enhancer Password is :-</em>
-          <b> ${randomPassword}</b>
+          <em>Your New Password is :-</em>
+          <b> http://localhost:5000/user/changepassword/${resetPasswordToken}</b>
         </h1>
       </div>
     </div>

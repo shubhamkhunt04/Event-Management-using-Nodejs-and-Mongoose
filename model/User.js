@@ -19,6 +19,14 @@ var UserSchema = new Schema(
       minlength: 8,
       trim: true,
     },
+    resetPasswordToken: {
+      type: String,
+      default: "",
+    },
+    resetPasswordExpires: {
+      type: String,
+      default: "",
+    },
 
     // posts: [
     //   {

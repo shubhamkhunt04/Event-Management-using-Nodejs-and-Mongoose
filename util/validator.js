@@ -94,3 +94,24 @@ module.exports.validateResetPasswordInput = async (email) => {
     return { message: "Something wents wrong !" };
   }
 };
+
+module.exports.validateChangePasswordInput = async (password) => {
+  const loginSchema = Joi.object().keys({
+    password: Joi.string().min(8).required().strict(),
+  });
+  try {
+    const { error } = await loginSchema.validate(
+      {
+        password,
+      },
+      { abortEarly: false }
+    );
+    if (error) {
+      return { isValid: false, error };
+    }
+    return { isValid: true };
+  } catch (err) {
+    console.log(err);
+    return { message: "Something wents wrong !" };
+  }
+};
