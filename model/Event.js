@@ -12,6 +12,14 @@ var EventSchema = new Schema(
       type: String,
       require: true,
     },
+    time: {
+      type: Date,
+      require: true,
+    },
+    description: {
+      type: String,
+      require: true,
+    },
 
     // email: {
     //   type: String,

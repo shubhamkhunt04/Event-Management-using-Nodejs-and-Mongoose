@@ -1,5 +1,4 @@
 const express = require("express");
-const { eventNames } = require("../model/User");
 const User = require("../model/User");
 const Event = require("../model/Event");
 const { verifyUser } = require("../middleware/verifyUser");
@@ -7,17 +6,27 @@ const {
   validateEventInput,
   validateInviteInput,
 } = require("../util/validators/eventValidator");
+const { paginatedResult } = require("../middleware/pagination");
 
 const eventRouter = express.Router();
 
 eventRouter.post("/createEvent", verifyUser, async (req, res) => {
-  let { eventName } = req.body;
-  const { isValid, error } = await validateEventInput(eventName);
+  let { eventName, time, description } = req.body;
+  const { isValid, error } = await validateEventInput(
+    eventName,
+    time,
+    description
+  );
   if (isValid) {
     const { id } = req.decoded;
     try {
       const user = await User.findById(id);
-      const event = await Event.create({ eventName, createdBy: user.username });
+      const event = await Event.create({
+        eventName,
+        time,
+        description,
+        createdBy: user.username,
+      });
       if (user) {
         user.userEvents.push(event.id);
         await user.save();
@@ -34,21 +43,26 @@ eventRouter.post("/createEvent", verifyUser, async (req, res) => {
   }
 });
 
-eventRouter.get("/events", verifyUser, async (req, res) => {
-  try {
-    const { id } = req.decoded;
-    const user = await User.findById(id).populate("userEvents");
-    if (user) {
-      return res.json({
-        payload: user.userEvents,
-        message: "User Events",
-      });
+eventRouter.get(
+  "/events",
+  verifyUser,
+  paginatedResult(Event),
+  async (req, res) => {
+    try {
+      const { id } = req.decoded;
+      const user = await User.findById(id).populate("userEvents");
+      if (user) {
+        return res.json({
+          payload: user.userEvents,
+          message: "User Events",
+        });
+      }
+      return res.json({ message: "User not found" });
+    } catch (error) {
+      res.json({ message: "Something went wrong" });
     }
-    return res.json({ message: "User not found" });
-  } catch (error) {
-    res.json({ message: "Something went wrong" });
   }
-});
+);
 
 eventRouter.put("/:eventId", verifyUser, async (req, res) => {
   const { email } = req.body;
@@ -115,14 +129,19 @@ eventRouter.get("/:eventId", verifyUser, async (req, res) => {
 });
 
 eventRouter.put("/:eventId/updateEvent", verifyUser, async (req, res) => {
-  const { eventName } = req.body;
-  const { isValid, error } = await validateEventInput(eventName);
+  const { eventName, time, description } = req.body;
+  const { isValid, error } = await validateEventInput(
+    eventName,
+    time,
+    description
+  );
   if (isValid) {
     try {
       const event = await Event.findById(req.params.eventId);
       if (!event) return res.json({ message: "Event not found" });
 
       event.eventName = eventName;
+      (event.time = time), (event.description = description);
       await event.save();
       res.json({ message: "Event details updated", payload: event });
     } catch (error) {
