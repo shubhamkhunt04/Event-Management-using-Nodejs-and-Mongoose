@@ -17,7 +17,6 @@ const { verifyUser } = require("../middleware/verifyUser");
 const userRouter = express.Router();
 
 userRouter.get("/users", paginatedResult(User), async (req, res) => {
-  console.log(req.decoded);
   const user = await User.find();
 
   res.json({ message: "All Users", payload: user });
@@ -126,12 +125,10 @@ userRouter.post("/resetpassword", async (req, res) => {
       const user = await User.findOne({ email });
       if (user) {
         const token = crypto.randomBytes(20).toString("hex");
-        console.log(token);
         await user.updateOne({
           resetPasswordToken: token,
           resetPasswordExpires: Date.now() + 60000,
         });
-        console.log(user);
         await mailSender(email, token, user.username);
         return res.json({
           message: "Reset password link send to on your register mail",
@@ -140,7 +137,6 @@ userRouter.post("/resetpassword", async (req, res) => {
         return res.json({ message: "Email is not exist in database" });
       }
     } catch (error) {
-      console.log(error);
       return res.json({ message: "Something went wrong" });
     }
   } else {
@@ -150,7 +146,6 @@ userRouter.post("/resetpassword", async (req, res) => {
 
 userRouter.put("/changepassword/:token", async (req, res) => {
   const { newPassword } = req.body;
-  console.log(newPassword);
 
   const { isValid, error } = await validateChangePasswordInput(newPassword);
   if (isValid) {

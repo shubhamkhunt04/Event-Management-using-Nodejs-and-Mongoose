@@ -137,6 +137,12 @@ eventRouter.put("/:eventId/updateEvent", verifyUser, async (req, res) => {
   );
   if (isValid) {
     try {
+      const userId = req.decoded;
+      const user = User.findById(userId.id);
+      // Not update others event
+      if (!user.userEvents.includes(req.params.eventId))
+        return res.json({ message: "Not allowed to update event details" });
+
       const event = await Event.findById(req.params.eventId);
       if (!event) return res.json({ message: "Event not found" });
 
